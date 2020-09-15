@@ -1,6 +1,6 @@
 <h2>Yet Another Yet Another Cat Challenge</h2>
 
-<h3>Description<h3>
+<h3>Description</h3>
 
 <blockquote>Yet Another Cat Challenge for you! Just another boring add/remove/share note app, but with 8 different cats!
 
