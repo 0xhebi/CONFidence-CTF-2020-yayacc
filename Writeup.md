@@ -8,9 +8,10 @@ http://yayacc.zajebistyc.tf</blockquote>
 
 
 
-<p>One day when I was chatting with my friend <a href="https://gynvael.coldwind.pl/">Gynvael</a>, he told me about one hard XSS challenge from CONFidence CTF 2020 that he faced. So I decided to give it a try and see what is going on, two hints that he gave me were : 1.HTML injection 2.Theme selection where XSS will happen.(Tho there is intended and unintended solution, we will cover both of them)<br>
-So in this challenge after we login, we get to the page where we can add "note". On view page source we can see this:
-</p>
+<p>One day when I was chatting with my friend <a href="https://gynvael.coldwind.pl/">Gynvael</a>, he told me about one hard XSS challenge from CONFidence CTF 2020 that he faced. So I decided to give it a try and see what is going on, two hints that he gave me were :</p>
+<ol>
+ <li>HTML injection</li> <li>Theme selection where XSS will happen.(Tho there is intended and unintended solution, we will cover both of them)</li></ol><br>
+<p>So in this challenge after we login, we get to the page where we can add "note". On view page source we can see this:</p>
 
 ![addnote](https://github.com/DejanJS/CONFidence-CTF-2020-yayacc/blob/master/entrypage.png)
 
@@ -152,3 +153,8 @@ Vary: Cookie
 X-DNS-Prefetch-Control: off
 ```
 
+<p>From all of this we can see few things, there is CSP rule with img-src to 'self' which is only going to allow same domain image, and script-src with unique nonce which is going to execute the script only with that nonce value (nonce value is different for every note). Selected cat is being added inside of that <code>start()</code> function as img.src, content is being added to container div and we do have option to change from White to Black theme color. We can either delete the current note or go back and share it with an admin.</p>
+
+<h3>Solution (Uninteded)</h3>
+
+<p>First step is HTML injection which we can achieve by changing the <code>select</code> tag to either input or textbox for cat selection. <b>Note that both solution intended and uninteded will require those steps.</b> </p>
