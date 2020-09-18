@@ -157,4 +157,16 @@ X-DNS-Prefetch-Control: off
 
 <h3>Solution (Uninteded)</h3>
 
-<p>First step is HTML injection which we can achieve by changing the <code>select</code> tag to either input or textbox for cat selection. <b>Note that both solution intended and uninteded will require those steps.</b> </p>
+<p>First step is HTML injection which we can achieve by changing the <code>select</code> tag to either input or textbox for cat selection. <b>Note that both solution intended and uninteded will require those steps.</b><br>Inputing punctioation type of payload we can see that some chars are not being escaped.
+
+```javascript
+img.src = '!"#$%&\&apos;()*+,-./:;<=>?@[\\]^_`{|}~';
+```
+There are certain punctioation signs that are not being escaped, those are : slashes, single quotes, backticks, less than and greater than sign... <br>
+And that is all fine... but there are some crucial questions to be asked. Since we know that <b><code>/flag?var=flag</code></b> is only accessible or rather to say only admin can see the flag, we will need to make a Note with XSS and share it to the admin and retrieve the flag that is on that endpoint. The questions are : </p>
+<ol>
+<li><b>How are we going to bypass CSP?</b></li>
+<li><b>How are we going to inject that XSS through theme selection?<b></li>	
+</ol>
+<br>
+<p>We know that CSP isn't going to allow ajax requests (default-src 'self' - fallback) to different domains </p>
