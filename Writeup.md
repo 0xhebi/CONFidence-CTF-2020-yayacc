@@ -173,7 +173,7 @@ And that is all fine... but there are some crucial questions to be asked. Since 
 
 <p>We know that CSP isn't going to allow ajax requests (default-src 'self' - fallback) to different domains, so how are we going to find an answer to question 1. or to be more precise how to make a request without javascript and ajax? This one was pretty hard to think of, after talking to Gynvael and some research there comes one thing <code><b>http-equiv="refresh" content="0; URL=..."</b></code> . Pretty interesting that I've forgot about this <b>meta tag</b> attribute, it is actually refreshing page and can do a redirect which is going to be exactly what we need.<br>Since he gave me a hint that XSS will be at selecting theme, fastly testing it out :</p>
 
-[!theme_xss_example](https://github.com/DejanJS/CONFidence-CTF-2020-yayacc/blob/master/theme_xss_example.png)
+![theme_xss_example](https://github.com/DejanJS/CONFidence-CTF-2020-yayacc/blob/master/theme_xss_example.png)
 
 <p>It does execute an alert as we see. Now really hard comes up, basically connecting two steps together. We need to redirect admin to the note where our XSS will be, grabbing the flag and sending it to our server.</p>
 
