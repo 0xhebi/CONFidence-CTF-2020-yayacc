@@ -10,8 +10,8 @@ http://yayacc.zajebistyc.tf</blockquote>
 
 <p>One day when I was chatting with my friend <a href="https://gynvael.coldwind.pl/">Gynvael</a>, and he told me about a hard XSS challenge from CONFidence CTF 2020 that he faced. So I decided to give it a try and see what is going on. He gave me two hints:</p>
 <ol>
- <li>HTML injection.</li>
- <li>Location of XSS should be at theme style selection. (Though there is an intended and an unintended solution; we will cover the intended one in part 2).</li>
+ <li><b>HTML injection.</b></li>
+ <li><b>Location of XSS should be at theme style selection. (Though there is an intended and an unintended solution; we will cover the intended one in part 2).</b></li>
 </ol><br>
 <p>So in this challenge after we login, we get to the page where we can add a "note". Looking at the raw HTML we get this:</p>
 
@@ -92,7 +92,7 @@ http://yayacc.zajebistyc.tf</blockquote>
 
 This HTML is sent with the following HTTP response headers: 
 <blockquote>
-	
+
 ```javascript
 Connection: keep-alive
 Content-Encoding: gzip
