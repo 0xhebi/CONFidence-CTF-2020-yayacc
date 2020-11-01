@@ -11,7 +11,7 @@ http://yayacc.zajebistyc.tf</blockquote>
 <p>One day when I was chatting with my friend <a href="https://gynvael.coldwind.pl/">Gynvael</a>, and he told me about a hard XSS challenge from CONFidence CTF 2020 that he faced. So I decided to give it a try and see what is going on. He gave me two hints:</p>
 <ol>
  <li>HTML injection.</li>
- <li>Location of XSS should be at theme style selection. (Though there is intended and unintended solution, we will cover intended in part 2).</li>
+ <li>Location of XSS should be at theme style selection. (Though there is an intended and an unintended solution; we will cover the intended one in part 2).</li>
 </ol><br>
 <p>So in this challenge after we login, we get to the page where we can add a "note". Looking at the raw HTML we get this:</p>
 
@@ -106,38 +106,67 @@ Vary: Cookie
 X-DNS-Prefetch-Control: off
 ```
 
-<p>From all of this we can see few things: there is a CSP rule with <code>img-src</code> set to 'self' which is only going to allow same origin images, and script-src with unique nonce which is going to allow executing only those scripts that have a valid nonce value (nonce value is random for every request). Selected cat is being added inside of that <code>start()</code> function as img.src, content is being added to container div and we do have option to change the theme color from White to Black. We can also either delete the current note or go back and share it with an admin.</p>
+<p>From all of this we can see a few things: there is a CSP rule with <code>img-src</code> set to 'self' which is only going to allow same origin images, and script-src with unique nonce which is going to allow executing only those scripts that have a valid nonce value (nonce value is random for every request). Looking at the HTML/JS, the selected cat is being added inside of that <code>start()</code> function as img.src, content is being added to container <code>div</code>, and we do have an option to change the theme color from White to Black. We can also either delete the current note or go back and share it with an admin.</p>
 
 <h3>Solution (Unintended)</h3>
 
-<p>First step is the aforementioned HTML injection which we can achieve by changing the <code>select</code> tag to either <code>input</code> or <code>textarea</code> for cat selection. <b>Note that both the intended and unintended solutions will require those steps.</b><br>Inputting various special characters as payload we can see that some of them are not being escaped.
+<h4><i>Step 1. HTML Injection</i></h4>
+<p>First step is the aforementioned HTML injection which we can achieve by changing the cat selection, <code>select</code> tag to either <code>input</code> or <code>textarea</code>. <b>Note that both the intended and unintended solutions will require those steps.</b><br>Inputting various special characters as payload we can see that some of them are not being escaped.
 
 ```javascript
 img.src = '!"#$%&\&apos;()*+,-./:;<=>?@[\\]^_`{|}~';
 ```
-There are certain characters that are not being escaped which is going to be important. Those are: slashes, single quotes, backticks, less than and greater than sign, and so on. <br>
-And that is all fine, but there are some crucial questions to be asked. Since we know that <b><code>/flag?var=flag</code></b> is only accessible by an admin (or rather to say only admin can see the real flag), we will need to make a note with XSS and share it with the admin to retrieve the flag that is on that endpoint. The questions are: </p>
-<ol>
-<li><b>How are we going to bypass CSP?</b></li>
-<li><b>How are we going to perform that XSS through theme selection?</b></li>	
-</ol>
-<br>
-<h4><i>Bypass CSP</i></h4>
+Those are: slashes, single quotes, backticks, less than and greater than sign, and so on. Single
+quote is being escaped as <code>&apos;</code> so injecting JS is not possible.
 
-<p>We know that CSP isn't going to allow Ajax requests (default-src 'self' - fallback) to different domains, so how are we going to find an answer to question number 1? Or to be more precise how to make a request without JavaScript and Ajax? This one was pretty hard to figure out, but after talking to Gynvael and doing some research one thing came up:  <code><b>http-equiv="refresh" content="0; URL=..."</b></code>. Pretty interesting that I've forgot about this <b>meta tag</b> attribute - it is actually refreshing the page and can do a redirect, which happens to be exactly what we need.<br>Since he gave me a hint that XSS will be located at the theme selection, let’s try it out:</p>
+<h4><i>Step 2. XSS</i></h4>
+
+Since I was given a hint that XSS will be located at the theme selection, let’s try it out:</p>
 
 ![theme_xss_example](https://github.com/DejanJS/CONFidence-CTF-2020-yayacc/blob/master/theme_xss_example.png)
 
-<p>It does execute an alert as we see. Now comes the really hard part which is basically connecting the two steps together. We need to redirect the admin to the note where our XSS will trigger, grab the flag and send it to our server.</p>
+<p>It does execute an alert as we see. Now comes the really hard part which is basically connecting the two steps together. We need to redirect the admin to the note where our XSS will trigger, grab the flag and send it to our server.
+We know that <b><code>/flag?var=flag</code></b> is only accessible by an admin (or rather to say only admin can see the real flag), we will need to make a note with XSS and share it with the admin to retrieve the flag that is on that endpoint. But problem is that we have CSP in our way. Initially I thought that we can make a request with script and direct the admin to XSS, or how it's usually done through an iframe. CSP isn't going to allow Ajax requests (default-src 'self' - fallback , which is the case for iframe as well) to different domains: </p>
+
+<blockquote>
+<i>The HTTP Content-Security-Policy (CSP) default-src directive serves as a fallback for the other CSP fetch directives. For each of the following directives that are absent, the user agent looks for the default-src directive and uses this value for it:
+<ul>
+<li>child-src</li>
+<li>connect-src</li>
+<li>font-src</li>
+<li>frame-src</li>
+<li>img-src</li>
+<li>manifest-src</li>
+<li>media-src</li>
+<li>object-src</li>
+<li>prefetch-src</li>
+<li>script-src</li>
+<li>script-src-elem</li>
+<li>script-src-attr</li>
+<li>style-src</li>
+<li>style-src-elem</li>
+<li>style-src-attr</li>
+<li>worker-src</li>
+</ul>
+</i>
+<p>
+<b>'self'</b>
+Refers to the origin from which the protected document is being served, including the same URL scheme and port number. You must include the single quotes. Some browsers specifically exclude blob and filesystem from source directives. Sites needing to allow these content types can specify them using the Data attribute.
+</p>
+</blockquote>
+
+
+<p>So how are we going to bypass it? Or to be more precise how to make a request without JavaScript and Ajax and direct admin to XSS? This one was pretty hard to figure out, but after talking to Gynvael and doing some research one thing came up:  <code><b>http-equiv="refresh" content="0; URL=..."</b></code>. Pretty interesting that I've forgot about this <b>meta tag</b> attribute - it is actually refreshing the page and can do a redirect, which happens to be exactly what we need.</p>
+</p>
 
 <h4><i>Making of the payload</i></h4>
 
-<p>I've created a test "note" and performed an HTML injection that I described above. First we can escape from the script tag where our JavaScript lives by closing script tag at the beginning of the payload, that will successfully bypass single quotes that is not being escaped. With that we are escaping the JavaScript context and we can followup with the refresh meta tag (Step 1 payload example). For example:</p>
+<p>I've created a test "note" and performed an HTML injection that I described above. First we can escape from the script tag where our JavaScript lives by closing script tag at the beginning of the payload, that will successfully bypass single quotes (as mentioned at the beginning of the previous step). With that we are escaping the JavaScript context and we can followup with the refresh meta tag (Step 1 payload example). For example:</p>
 
 ```javascript
 </script><meta http-equiv="refresh" content="0;URL=http://yayacc.zajebistyc.tf/flag?var=flag">
 ```
-<p>Testing this successfully redirected us to the flag query path which is a good thing.<br>Connecting to Step 2 now, we have to craft an actual XSS script that we will inject in our selected "theme" and share that note with the admin, which in turn will force admin's browser to make a request to our server where we will store the request (and the flag). We know that script will be concatenated to <code>document.body.style</code> because that is where the theme is being set inside that start function (and from our alert example). So creating a new script and appending it to the DOM should be easy, right?<br> Well yea... but not really. There is a hard part – we have to bypass the CSP with that <code>script nonce</code>(Only script with nonce value will be executed). Though if you scroll up to the start of the script tag you will see the following piece of code on the very next line: <code>document.scripts[0].remove()</code>.<br>I did think it's going be straight forward from here, but it won't because of that line there... Gynvael gave me a hint-by-question: is the script really being removed or is there a reference kept somewhere? And yes there was a reference.<br>The answer to this is: <a href="https://developer.mozilla.org/en-US/docs/Web/API/Document/currentScript">document.currentScript<a>.<br>
+<p>Testing this successfully redirected us to the flag query path which is a good sign.<br>Connecting to Step 2 now, we have to craft an actual XSS script that we will inject in our selected "theme" and share that note with the admin, which in turn will force admin's browser to make a request to our server where we will store the request (and the flag). We know that script will be concatenated to <code>document.body.style</code> because that is where the theme is being set inside that start function (and from our alert example). So creating a new script and appending it to the DOM should be easy, right?<br> Well yea... but not really. There is a hard part – we have to bypass the CSP with that <code>script nonce</code> (only scripts with nonce value will be executed). Though if you scroll up to the start of the script tag you will see the following piece of code on the very next line: <code>document.scripts[0].remove()</code>.<br>I did think it's going be straight forward from here, but it won't because of that line there... Gynvael gave me a hint-by-question: is the script really being removed or is there a reference kept somewhere? And yes there was a reference.<br>The answer to this is: <a href="https://developer.mozilla.org/en-US/docs/Web/API/Document/currentScript">document.currentScript<a>.<br>
 </p>
 <p>In the docs you can find this:</p>
 
@@ -146,14 +175,13 @@ And that is all fine, but there are some crucial questions to be asked. Since we
 ```javascript
 The Document.currentScript property returns the script element whose script is currently being processed and isn't a JavaScript module. (For modules use import.meta instead.)
 It's important to note that this will not reference the script element if the code in the script is being called as a callback or event handler; it will only reference the element while it's initially being processed.
-
 ```
 
 </blockquote>
 
-<p>That is exactly what we need! The script’s nonce attribute while is being executed, we will grab that nonce and add it to our newly created script with src <code>/flag?var=flag</code>. This way we will have flag as a global variable and we just have to exfiltrate it to our server. And this is achievable with <code>document.location</code> which is going to make a GET request to our server with the flag being sent in the query string.<br> </p>
+<p>That is exactly what we need! The script’s nonce attribute while is being executed, we will grab that nonce and add it to our newly created script with src <code>/flag?var=flag</code>. This way we will have flag as a global variable and we just have to exfiltrate it to our server(and CSP is being annoying again). And this is achievable with <code>document.location</code> which is going to make a GET request to our server with the flag being sent in the query string. </p>
 <br>
-<p>Now we just created a new note with some random content, did the HTML injection, and inserted the payload as shown below. Meta refresh tag URL is linking to previous note that we've made.</p>
+<p>Now it was enough to  create a new note with some random content, do the HTML injection, and insert the payload as shown below. Meta refresh tag URL is linking to previous note that we've made.</p>
 
 <p>Our final payload should look like this:</p>
 
