@@ -92,7 +92,7 @@ http://yayacc.zajebistyc.tf</blockquote>
 
 This HTML is sent with the following HTTP response headers: 
 <blockquote>
-
+```javascript
 Connection: keep-alive
 Content-Encoding: gzip
 Content-Security-Policy: default-src 'none'; form-action 'self'; frame-ancestors 'none'; style-src https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css; img-src 'self'; script-src 'nonce-VWn7r5GTbTcLZSqYM4JutQ' https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/; frame-src https://www.google.com/recaptcha/
@@ -104,6 +104,7 @@ Transfer-Encoding: chunked
 Vary: Accept-Encoding
 Vary: Cookie
 X-DNS-Prefetch-Control: off
+```
 </blockquote>
 
 <p>From all of this we can see a few things: there is a CSP rule with <code>img-src</code> set to 'self' which is only going to allow same origin images, and script-src with unique nonce which is going to allow executing only those scripts that have a valid nonce value (nonce value is random for every request). Looking at the HTML/JS, the selected cat is being added inside of that <code>start()</code> function as img.src, content is being added to container <code>div</code>, and we do have an option to change the theme color from White to Black. We can also either delete the current note or go back and share it with an admin.</p>
